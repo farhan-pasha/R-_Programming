@@ -1,0 +1,184 @@
+
+---
+title: '18200409'
+author: "Mohammad Farhan Pasha (18200409)"
+date: "October 09, 2018"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Task : 1
+
+##Question : 1
+
+###Load the Dataset with name of the countries as row names
+
+
+```{r}
+example <- read.csv('C:/Users/Farhan Pasha/Desktop/TT/R/Assignment 1/EurostatCrime2015.csv', header = TRUE, row.names = 1)
+example
+```
+
+
+
+
+##Question : 2
+
+###What's the size and structure of this dataset
+
+```{r}
+object.size(example)
+ncol(example) #Number of Columns
+nrow(example) #Number of Rows
+str(example) #Structure
+
+```
+
+##Question : 3 Part 1
+
+###Apend new Column Sex.crime which gives the sum of Rape,Sexual.assault and Sexual.voilence
+```{r}
+example$Sex.crime <- example$Rape+example$Sexual.assault+example$Sexual.violence
+example
+```
+
+##Question : 3 Part 2
+
+###Remove 3 columns : Rape, Sexual.assault and Sexual.violence
+```{r}
+example <- subset(example,select = -c(Rape, Sexual.assault, Sexual.violence))
+example
+```
+
+
+
+##Question : 4
+
+###With new dataset obtained, list countries that containes missing data.
+
+
+```{r}
+example_new <- example[!complete.cases(example),]
+rownames(example_new)
+```
+
+
+
+##Question : 5
+
+###Remove Countries with missing Values
+
+```{r}
+example <- na.omit(example)
+example
+```
+
+##Question : 6
+
+###Size of new dataframe
+
+```{r}
+object.size(example)
+ncol(example) #Number of Columns
+nrow(example) #Number of Rows
+
+```
+
+
+#Task : 2 Part 1
+
+##The most common Crime in Ireland in 2015
+
+
+```{r}
+
+example <- cbind(rownames(example), example)
+colnames(example)[1:1] <- c("COL1") # Naming the first column as col1.
+
+
+ire <- example[example$COL1 == "Ireland",]
+
+max <- apply(ire[,2:6],1,max) #Store the max value
+
+print("Most Common Crime in Ireland in 2015:")
+print(colnames(ire)[which(ire==max, arr.ind=TRUE)][2]) #Locate the column of that max value
+```
+
+#Task : 2 Part 2
+
+##The least common Crime in Ireland in 2015
+
+
+```{r}
+
+minimum <- apply(ire[,2:6],1,min)
+
+colnames(ire)[which(ire==minimum, arr.ind=TRUE)][2]
+
+ire1 <- subset(ire, select = -c(Intentional.homicide)) #As we got homicide in first min, remove the whole column and again fing minimum
+minimum <- apply(ire1[,2:5],1,min)
+colnames(ire1)[which(ire1==minimum, arr.ind=TRUE)][2]
+
+ire2 <- subset(ire1, select = -c(Robbery))#Remove above both column then find minimum again.
+minimum <- apply(ire2[,2:4],1,min)
+colnames(ire2)[which(ire2==minimum, arr.ind=TRUE)][2]
+```
+
+#Task : 2 Part 3
+
+##Which country has the highest record of offences
+
+```{r}
+
+test<-example  #Copy...Because it is going to get modified.
+
+
+test$total_offences <-  test$Assault + test$Intentional.homicide + test$Robbery + test$Theft + test$Sex.crime
+
+
+max_values_offences <- max(test$total_offences) # Find Max of all totals
+max_values_offences 
+
+answer <-rownames(test)[which(test$total_offences==max_values_offences, arr.ind=TRUE)][1]
+answer
+
+
+
+```
+#Task : 3
+
+##Outline your findings
+
+
+```{r}
+
+slice <- c(0,sum(ire$Assault),sum(ire$Intentional.homicide),sum(ire$Robbery),sum(ire$Theft),sum(ire$Sex.crime))
+label <- colnames(ire)
+
+percent <- round(slice/sum(slice)*100)
+label <- paste(label, percent) 
+label <- paste(label,"%",sep="") # ad % to labels 
+
+pie(slice, labels = label,col=rainbow(length(label)), main="Figure 1 : Pie Chart for % wise distribution of crimes.")
+```
+
+
+
+```{r}
+Theft <- example$Theft
+barplot(Theft, xlab = "Figure 2 : Theft",names.arg = rownames(example), ylab="Occurence")
+```
+
+
+
+#Conclusion: 
+## Figure 1 : Theft comprises 76% of the total Crimes.
+
+##Figure 2 : Scandinavian Countries like Denmark, Sweden, Finland have seen the highest rate of Thefts in 2015
+
+
